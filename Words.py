@@ -3,18 +3,16 @@ from datetime import date
 from datetime import datetime
 import mongo_credential
 
-
-
-
-
-class Vocabulary:
+class Word:
     def __init__(self):
         client = pymongo.MongoClient(mongo_credential.mongo_url)
         db = client['Vocabulary']
         vocabularies = db["Vocabularies"]
+        words = db["Words"]
 
         self.db = db
         self.vocabularies = vocabularies
+        self.words = words
 
     def add_from_csv(self, txt_file):
         with open(txt_file,"r", encoding="UTF-8") as f:
@@ -52,27 +50,25 @@ class Vocabulary:
             # 'Third Repeat' : third_repeat,
             'Date added' : datetime.now()
         }
-        return self.vocabularies.insert_one(document)
+        return self.word.insert_one(document)
 
-    def add_word_new(self,language,translate_lang, word,word_type, spelling,meaning, usage, addedby):
-
+    def add_word_new(self,word, word_type, definition, usage,  languageId,  addedby):
         word = {
                 'Word' : word,
-                'Language' :  language,
-                'Spelling':spelling,
                 'WordType':word_type,
-                'Translate': {
-                    'Language' : translate_lang,
-                    'Meaning':meaning,
-                    'UsageExample':usage
-                    }
-                ,
+                'Definition':definition,
+                'UsageExample':usage,
+                'LanguageId' :  languageId,
                 'DateAdded':datetime.now(),
                 'AddedBy':addedby
                 }
         
-        print(word)
-        return self.vocabularies.insert_one(word)
+        return self.words.insert_one(word)
+    
+    def get_wordID(self,word):
+        result = self.words.find_one({"Word" : word})
+
+        return result
 
 
     def delete_word(self):
@@ -374,57 +370,3 @@ class Vocabulary:
             self.update_third_repeat_date(lang,word)    
             
             print("######################")
-
-
-
-# lng = 'English'
-# wrd = 'Abandon'
-# wrd_type = 'Verb'
-# spelling = 'Ebendın'
-# tr_meaning = 'Terk Etmek, Bırakmak'
-# eng_meaning = ''
-# usage = 'He had to abandon his car on the side of the road because it had run out of gas.'
-# first_learning = None
-# first_rpt = None
-# scd_rpt = None
-# trd_rpt = None
-
-# add_word (language=lng,word= wrd,word_type=wrd_type,spelling=spelling,turkish_meaning=tr_meaning,english_meaning= eng_meaning,usage=usage,first_learning_date=first_learning,first_repeat=first_rpt,second_repeat=scd_rpt,third_repeat=trd_rpt)
-
-# get_word('English','Abandon')
-
-# add_from_csv("Vocabulary.csv") 
-# delete_word()
-
-#get_all_words()
-
-# This function gets all daily words: 1 - New Words, 2- First Repeat Words, 3- Second Repeat Words, 4- Third Repeat Words
-# Total Maximum 20 Words to memorize.
-voc = Vocabulary()
-# voc.get_all_words()
-# print("-------------- New Words ------------------")
-# voc.get_new_words()
-# print("-------------- First Repeat ------------------")
-#voc.get_first_repeat_words()
-# print("-------------- Second Repeat ------------------")
-# voc.get_second_repeat_words()
-# print("-------------- Third  Repeat ------------------")
-# voc.get_third_repeat_words()
-# voc.get_new_words()
-
-# voc.add_from_csv("Vocabulary.csv")
-
-# lang = None #"English"
-# word = "Book"
-# filter = {}
-# new_values = {} 
-
-# if (lang != None):
-#     filter.update({"Language":lang})
-# if (word != None):
-#     filter.update({"Word":word})
-
-
-# voc.update_word(lang="English",word="book",nw_wt="Noun",nw_usa="I bought a new book to learn English from beginning")
-# add_word_new(self,language,translate_lang, word,word_type, spelling,meaning, usage):
-voc.add_word_new("English", "Türkçe","Book","Noun", "buuk","Kitap", "I bought a new book to learn English from beginning","htatarli")
